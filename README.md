@@ -42,7 +42,7 @@ There are several libraries that needs to be inserted if you want to run the sys
 6. Sample Output: 
 A sample output including the whole UI is shown below where we show changes the trends of change for 3 years of Soil Moisture data (three .csv files named '2013-03-01.csv', '2014-03-01.csv', '2015-03-01.csv').
 
-
+![](System.PNG)<!-- -->
    
    
 
