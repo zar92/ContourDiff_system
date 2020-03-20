@@ -369,7 +369,7 @@ class Ui_MainWindow(object):
         self.label_compass.setFrameShape(QtWidgets.QFrame.NoFrame)
         self.label_compass.setFrameShadow(QtWidgets.QFrame.Raised)
         self.label_compass.setText("")
-        self.label_compass.setPixmap(QtGui.QPixmap("C:/Users/Phoenix/Desktop/contourdiff-master/compass-design_1174-3.jpg"))
+        self.label_compass.setPixmap(QtGui.QPixmap("directory to compass image in Assets folder included in the repository"))
         self.label_compass.setScaledContents(True)
         self.label_compass.setWordWrap(False)
         self.label_compass.setObjectName("label_compass")
