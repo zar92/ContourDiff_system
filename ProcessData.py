@@ -256,7 +256,7 @@ def dir_mag_by_5(filelist, column_name):
                  'dir_23': padded_matrix_2[3:-1, 4:],
                  'dir_22': padded_matrix_2[4:, 3:-1], 'dir_21': padded_matrix_2[4:, 1:-3],
                  'dir_20': padded_matrix_2[3:-1, 0:-4], 'dir_19': padded_matrix_2[1:-3, 0:-4],
-                 'dir_18': padded_matrix_2[0:-4, 3:-1], 'dir_17': padded_matrix_2[0:-4, 1:-3],
+                 'dir_18': padded_matrix_2[0:-4, 1:-3], 'dir_17': padded_matrix_2[0:-4, 3:-1],
                  'dir_16': padded_matrix_2[1:-3, 4:]
                  }
         start_time_dir_mag = time.time()
