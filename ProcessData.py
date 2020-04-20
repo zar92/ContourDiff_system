@@ -235,6 +235,7 @@ def dir_mag_by_5(filelist, column_name):
                                  mode='constant', constant_values=0)  # to calculate 1st degree neighbors
         direction = np.zeros((699, 639, 24))
         org = padded_matrix_1[1:-1, 1:-1]
+        #identifying the points
         dirs = {'dir_0': padded_matrix_1[1:-1, 2:], 'dir_1': padded_matrix_1[0:-2, 2:],
                 'dir_2': padded_matrix_1[0:-2, 1:-1],
                 'dir_3': padded_matrix_1[0:-2, 0:-2], 'dir_4': padded_matrix_1[1:-1, 0:-2],
@@ -247,20 +248,28 @@ def dir_mag_by_5(filelist, column_name):
                  'dir_11': padded_matrix_2[0:-4, 0:-4], 'dir_12': padded_matrix_2[2:-2, 0:-4],
                  'dir_13': padded_matrix_2[4:, 0:-4],
                  'dir_14': padded_matrix_2[4:, 2:-2], 'dir_15': padded_matrix_2[4:, 4:],
-                 'dir_16': padded_matrix_2[3:-1, 4:],
-                 'dir_17': padded_matrix_2[4:, 3:-1], 'dir_18': padded_matrix_2[4:, 1:-3],
-                 'dir_19': padded_matrix_2[3:-1, 0:-4], 'dir_20': padded_matrix_2[1:-3, 0:-4],
-                 'dir_21': padded_matrix_2[0:-4, 3:-1], 'dir_22': padded_matrix_2[0:-4, 1:-3],
-                 'dir_23': padded_matrix_2[1:-3, 4:]
+                 # 'dir_16': padded_matrix_2[3:-1, 4:],
+                 # 'dir_17': padded_matrix_2[4:, 3:-1], 'dir_18': padded_matrix_2[4:, 1:-3],
+                 # 'dir_19': padded_matrix_2[3:-1, 0:-4], 'dir_20': padded_matrix_2[1:-3, 0:-4],
+                 # 'dir_21': padded_matrix_2[0:-4, 3:-1], 'dir_22': padded_matrix_2[0:-4, 1:-3],
+                 # 'dir_23': padded_matrix_2[1:-3, 4:]
+                 'dir_23': padded_matrix_2[3:-1, 4:],
+                 'dir_22': padded_matrix_2[4:, 3:-1], 'dir_21': padded_matrix_2[4:, 1:-3],
+                 'dir_20': padded_matrix_2[3:-1, 0:-4], 'dir_19': padded_matrix_2[1:-3, 0:-4],
+                 'dir_18': padded_matrix_2[0:-4, 3:-1], 'dir_17': padded_matrix_2[0:-4, 1:-3],
+                 'dir_16': padded_matrix_2[1:-3, 4:]
                  }
         start_time_dir_mag = time.time()
+        #calculating the differences
         for i in range(24):
             if (i < 8):
                 direction[:, :, i] = org - dirs['dir_' + str(i)]
             else:
                 direction[:, :, i] = org - dirs2['dir_' + str(i)]
+        # magnitude and direction list
             mag_list.append(np.linalg.norm(direction, axis=2))
             dir_list.append(direction)
+
         print("For computing direction and magnitude %s seconds" %(time.time() - start_time_dir_mag))
         return mag_list, dir_list
 
@@ -272,17 +281,45 @@ def draw_dirs2(filelist, column_name):
     res_dir_y_list = list()
     start_time_vector_components = time.time()
     for i in range(len(filelist)):
+        #for each file a structure is created to keep their directions
         res_dir_x = np.zeros_like(mag[i])
         res_dir_y = np.zeros_like(mag[i])
+        # for each file, direction values in all directions are added
         for d in range(24):
-            if (d < 16):
+            # if (d < 16):
+            #     res_dir_x += direction[i][:, :, d] * np.cos(np.pi / 4 * (d % 8))
+            #     res_dir_y += direction[i][:, :, d] * np.sin(np.pi / 4 * (d % 8))
+            # else:
+            #     res_dir_x += direction[i][:, :, d] * np.cos(np.pi / 8 * 2 * (d % 8) + 1)
+            #     res_dir_y += direction[i][:, :, d] * np.sin(np.pi / 8 * 2 * (d % 8) + 1)
+            #     res_dir_x_list.append(res_dir_x)
+            #     res_dir_y_list.append(res_dir_y)
+            if (d==0 or d==1 or d==2 or d==8 or d==9 or d==10):
                 res_dir_x += direction[i][:, :, d] * np.cos(np.pi / 4 * (d % 8))
                 res_dir_y += direction[i][:, :, d] * np.sin(np.pi / 4 * (d % 8))
-            else:
-                res_dir_x += direction[i][:, :, d] * np.cos(np.pi / 8 * 2 * (d % 8) + 1)
-                res_dir_y += direction[i][:, :, d] * np.sin(np.pi / 8 * 2 * (d % 8) + 1)
-                res_dir_x_list.append(res_dir_x)
-                res_dir_y_list.append(res_dir_y)
+            elif (d==3 or d==4 or d==11 or d==12):
+                res_dir_x += -direction[i][:, :, d] * np.cos(np.pi - (np.pi / 4 * (d % 8)))
+                res_dir_y += direction[i][:, :, d] * np.sin(np.pi - (np.pi / 4 * (d % 8)))
+            elif (d==5 or d==6 or d==13 or d==14):
+                res_dir_x += -direction[i][:, :, d] * np.cos((np.pi / 4 * (d % 8)) - np.pi)
+                res_dir_y += -direction[i][:, :, d] * np.sin((np.pi / 4 * (d % 8)) - np.pi)
+            elif (d==7 or d==15):
+                res_dir_x += direction[i][:, :, d] * np.cos(2 * np.pi - (np.pi / 4 * (d % 8)))
+                res_dir_y += -direction[i][:, :, d] * np.sin(2 * np.pi - (np.pi / 4 * (d % 8)))
+            elif (d==16 or d==17):
+                res_dir_x += direction[i][:, :, d] * np.cos(np.pi / 8 * ((2 * (d % 8)) + 1))
+                res_dir_y += direction[i][:, :, d] * np.sin(np.pi / 8 * ((2 * (d % 8)) + 1))
+            elif (d==18 or d==19):
+                res_dir_x += -direction[i][:, :, d] * np.cos(np.pi - (np.pi / 8 * ((2 * (d % 8)) + 1)))
+                res_dir_y += direction[i][:, :, d] * np.sin(np.pi - (np.pi / 8 * ((2 * (d % 8)) + 1)))
+            elif (d==20 or d==21):
+                res_dir_x += -direction[i][:, :, d] * np.cos((np.pi / 8 * ((2 * (d % 8)) + 1)) - np.pi)
+                res_dir_y += -direction[i][:, :, d] * np.sin((np.pi / 8 * ((2 * (d % 8)) + 1)) - np.pi)
+            elif (d==22 or d==23):
+                res_dir_x += direction[i][:, :, d] * np.cos(2 * np.pi - (np.pi / 8 * ((2 * (d % 8)) + 1)))
+                res_dir_y += direction[i][:, :, d] * np.sin(2 * np.pi - (np.pi / 8 * ((2 * (d % 8)) + 1)))
+            res_dir_x_list.append(res_dir_x)
+            res_dir_y_list.append(res_dir_y)
     print("For computing vector components %s seconds" % (time.time() - start_time_vector_components))
 
     return res_dir_x_list, res_dir_y_list, mag, direction
@@ -293,15 +330,22 @@ def fetch_direction(file_list, column_name):
     """Aggregate resultant direction in"""
     start_time_aggrigating_vector_components = time.time()
     res_dir_x_list, res_dir_y_list, mag, direction = draw_dirs2(file_list, column_name)
+    #creating structure like mag
     all_in_x = np.zeros_like(mag[0])
     all_in_y = np.zeros_like(mag[0])
     all_mag = np.zeros_like(mag[0])
+    #aggregating all direction values in x and y positions for all files
     for i in range(len(res_dir_x_list)):
         all_in_x = np.add(all_in_x, res_dir_x_list[i])
         all_in_y = np.add(all_in_y, res_dir_y_list[i])
+    #creating 1 D array of aggregated results in X and Y directions
     res_x = all_in_x.ravel()
     res_y = all_in_y.ravel()
+
+    #adding a column as aggregated recult in dataframe from a dataset
     data = importData(file_list[0])
+    # why??
+    print(file_list)
     data['res_x'] = res_x
     data['res_y'] = res_y
     print("For aggregating vector components %s seconds" % (time.time() - start_time_aggrigating_vector_components))
@@ -310,21 +354,29 @@ def fetch_direction(file_list, column_name):
 
 def createWeightedGraph(contourdf, file_list, column_name):
     """Created a weighted graph from extracted contour"""
+
+    # Here is the short description for weighted graph.
+    # The function computes the length of each path. Which is then taken as a weight. Then, aggregated direction is taken for each point on the graph using fetchDirection() function.
+    # Then, the resultant direction got multiplied with the weight of each path which gave us the final resultant along x and y axis.
+
     start_time_creating_weighted_graph = time.time()
     weights = np.full((len(contourdf)), 1)  # initialize weights to one
     contourdf['weights'] = weights
     # group the dataframe to count path_length(number of nodes in the path)
     path_length_df = contourdf.groupby(['level', 'path']).size().reset_index(name='path_length')
 
+    # find all paths in all levels that have only one node or path length 1
     path_length_1_df = path_length_df[path_length_df['path_length'] == 1]
     cntr_data_weight_0 = contourdf[(np.isin(contourdf['level'], path_length_1_df['level'])) &
                                    (np.isin(contourdf['path'], path_length_1_df['path']))]
+    # these path length 1 paths have weight 0
     cntr_data_weight_0['weights'] = 0
-
+    # finding all other paths
     cntr_data__weight_1 = contourdf[~(np.isin(contourdf['level'], path_length_1_df['level'])) |
                                     ~(np.isin(contourdf['path'], path_length_1_df['path']))]
 
     cntr_data_weight_1_diffrence = (cntr_data__weight_1.shift() - cntr_data__weight_1)
+    #calculating weight as Sqr_root(x^2 + y^2)
     cntr_data_weight_1_diffrence['calculated_weight'] = (np.sqrt(
         (cntr_data_weight_1_diffrence['node_x'].values) ** 2 + (
             cntr_data_weight_1_diffrence['node_y'].values) ** 2).tolist())
@@ -353,6 +405,8 @@ def createWeightedGraph(contourdf, file_list, column_name):
     weighted_df['normalized'] = (weighted_df['aggregated_weight'] - weighted_df['aggregated_weight'].min()) / (
                 weighted_df['aggregated_weight'].max() - weighted_df['aggregated_weight'].min())
 
+
+    # fethching the direction values
     data = fetch_direction(file_list, column_name)
 
     data['node_x_1'] = data['longitude']
