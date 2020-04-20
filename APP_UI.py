@@ -369,7 +369,7 @@ class Ui_MainWindow(object):
         self.label_compass.setFrameShape(QtWidgets.QFrame.NoFrame)
         self.label_compass.setFrameShadow(QtWidgets.QFrame.Raised)
         self.label_compass.setText("")
-        self.label_compass.setPixmap(QtGui.QPixmap("directory to compass image in Assets folder included in the repository"))
+        self.label_compass.setPixmap(QtGui.QPixmap("C:/Users/Phoenix/Desktop/contourdiff-master/compass-design_1174-3.jpg"))
         self.label_compass.setScaledContents(True)
         self.label_compass.setWordWrap(False)
         self.label_compass.setObjectName("label_compass")
@@ -853,16 +853,19 @@ class Ui_MainWindow(object):
         # levels = self.getcutOffValues()
         # self.data = ProcessData.createQuantile(self.data,self.data[column],levels[0])
         ####
-        self.data['levels'] = self.data[column]
+        #self.data['levels'] = self.data[column]
         # data normalizing
-        #self.data['levels'] = (self.data[column] - self.data[column].min()) / (self.data[column].max() - self.data[column].min())
+        self.data['levels'] = (self.data[column] - self.data[column].min()) / (self.data[column].max() - self.data[column].min())
         levels = self.getcutOffValues()
         #levels = [0.75, 0.95]
         quantile_values = np.quantile(self.data['levels'], levels)
-
         #print(self.data['levels'])
         print(quantile_values)
-
+        if (quantile_values[0] == quantile_values[1]):
+            quantile_values[1] = quantile_values[1] + .00000001
+        elif (quantile_values[1] == quantile_values[2]):
+            quantile_values[2] = quantile_values[2] + .00000001
+        print(quantile_values)
         #creating contourmap with normalized data and three levels of user selected cutoff points
         cntr_set = plt.contour(np.array(self.data['levels']).reshape(699, 639), quantile_values, colors=['g', 'r', 'y'])
         #print (cntr_set)
