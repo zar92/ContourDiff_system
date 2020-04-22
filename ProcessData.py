@@ -444,21 +444,15 @@ def createWeightedGraph(contourdf, file_list, column_name):
 
 def filterBasedOnGrid(depth, weighted_graph):
     """Grid"""
-
-
-    print('mike here')
     points = list(zip(weighted_graph['node_x'].tolist(), weighted_graph['node_y'].tolist()))
     qtree = QTree(depth, points)
-    print(points)
+    #print(points)
     qtree.subdivide()
-    print('I am also here')
     h = qtree.graph()
-
     x_grid = np.unique(np.array(h[0])//1).tolist()
     y_grid =  np.unique(np.array(h[1])//1).tolist()
     weighted_graph = weighted_graph[
         (np.isin(weighted_graph['node_x'], x_grid)) | (np.isin(weighted_graph['node_y'], y_grid))]
-    # print(x_grid)
     return weighted_graph
 
 
