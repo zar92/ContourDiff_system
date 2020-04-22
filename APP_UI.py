@@ -843,29 +843,30 @@ class Ui_MainWindow(object):
 
 
 # starting point
-    def processSelectedData(self):
+     def processSelectedData(self):
         print('processSD')
         file_list = list(self.filenameToPathDict.values())
         self.data = ProcessData.importData(file_list[0])
         column_index = self.comboBox_column_name.currentIndex()
         column = self.column_list[column_index]
-        #edit
+        # #edit
+        # # levels = self.getcutOffValues()
+        # # self.data = ProcessData.createQuantile(self.data,self.data[column],levels[0])
+        # ####
+        # #self.data['levels'] = self.data[column]
+        # # data normalizing
+        # self.data['levels'] = (self.data[column] - self.data[column].min()) / (self.data[column].max() - self.data[column].min())
         # levels = self.getcutOffValues()
-        # self.data = ProcessData.createQuantile(self.data,self.data[column],levels[0])
-        ####
-        #self.data['levels'] = self.data[column]
-        # data normalizing
-        self.data['levels'] = (self.data[column] - self.data[column].min()) / (self.data[column].max() - self.data[column].min())
-        levels = self.getcutOffValues()
-        #levels = [0.75, 0.95]
-        quantile_values = np.quantile(self.data['levels'], levels)
-        #print(self.data['levels'])
-        print(quantile_values)
-        if (quantile_values[0] == quantile_values[1]):
-            quantile_values[1] = quantile_values[1] + .00000001
-        elif (quantile_values[1] == quantile_values[2]):
-            quantile_values[2] = quantile_values[2] + .00000001
-        print(quantile_values)
+        # #levels = [0.75, 0.95]
+        # quantile_values = np.quantile(self.data['levels'], levels)
+        # #print(self.data['levels'])
+        # print(quantile_values)
+        # if (quantile_values[0] == quantile_values[1]):
+        #     quantile_values[1] = quantile_values[1] + .00000001
+        # elif (quantile_values[1] == quantile_values[2]):
+        #     quantile_values[2] = quantile_values[2] + .00000001
+        # print(quantile_values)
+        quantile_values = self.quantile_calculation()
         #creating contourmap with normalized data and three levels of user selected cutoff points
         cntr_set = plt.contour(np.array(self.data['levels']).reshape(699, 639), quantile_values, colors=['g', 'r', 'y'])
         #print (cntr_set)
@@ -1051,6 +1052,21 @@ class Ui_MainWindow(object):
         cut_off_point_3 = self.horizontalSlider_isoline3.value() / 100
         return [cut_off_point_1, cut_off_point_2, cut_off_point_3]
 
+    def quantile_calculation(self):
+        file_list = list(self.filenameToPathDict.values())
+        self.data = ProcessData.importData(file_list[0])
+        column_index = self.comboBox_column_name.currentIndex()
+        column = self.column_list[column_index]
+        self.data['levels'] = (self.data[column] - self.data[column].min()) / (
+                    self.data[column].max() - self.data[column].min())
+        levels = self.getcutOffValues()
+        quantile_values = np.quantile(self.data['levels'], levels)
+        if (quantile_values[0] == quantile_values[1]):
+            quantile_values[1] = quantile_values[1] + .00000001
+        elif (quantile_values[1] == quantile_values[2]):
+            quantile_values[2] = quantile_values[2] + .00000001
+        return quantile_values
+    
     def setPushButton_distrbution(self):
         if (self.filenameToPathDict):
             self.dist_canvas.clearPlt()
@@ -1058,8 +1074,8 @@ class Ui_MainWindow(object):
             column_list_index = self.comboBox_column_name.currentIndex()
             column = self.column_list[column_list_index]
             self.dist_canvas.dist_plot(file, column)
-            self.dist_canvas.addVerticalLines(self.getcutOffValues()[0], self.getcutOffValues()[1],
-                                              self.getcutOffValues()[2])
+            self.dist_canvas.addVerticalLines(self.quantile_calculation()[0], self.quantile_calculation()[1],
+                                              self.quantile_calculation()[2])
             self.groupBox_map_properties.setEnabled(False)
             #self.groupBox_content_properties.setEnabled(False)
     def pushButton_dataproperties_reset_listener(self):
