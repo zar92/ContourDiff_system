@@ -843,7 +843,7 @@ class Ui_MainWindow(object):
 
 
 # starting point
-     def processSelectedData(self):
+    def processSelectedData(self):
         print('processSD')
         file_list = list(self.filenameToPathDict.values())
         self.data = ProcessData.importData(file_list[0])
@@ -982,6 +982,7 @@ class Ui_MainWindow(object):
         worker = Worker(self.setupValuesColumnNameComboBox)
         worker.signals.finished.connect(self.thread_complete)
         self.threadpool.start(worker)
+
     def setupValuesColumnNameComboBox(self):
         self.column_list = list()
         first_file = list(self.filenameToPathDict.values())[0]
@@ -1066,7 +1067,7 @@ class Ui_MainWindow(object):
         elif (quantile_values[1] == quantile_values[2]):
             quantile_values[2] = quantile_values[2] + .00000001
         return quantile_values
-    
+
     def setPushButton_distrbution(self):
         if (self.filenameToPathDict):
             self.dist_canvas.clearPlt()
