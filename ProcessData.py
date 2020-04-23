@@ -226,15 +226,60 @@ def modelTheGraph(contourset):
     return cntr_data
 
 
+# def dir_mag_by_5(filelist, column_name):
+#     """Calculate scalar diffrence of an entry againist its 24 neigbors"""
+#     mag_list = list()
+#     dir_list = list()
+#     for i in range(len(filelist)):
+#         padded_matrix_1 = np.pad(importData(filelist[i])[column_name].values.reshape(699, 639), [(1, 1), (1, 1)],
+#                                  mode='constant', constant_values=0)  # to calculate 1st degree neighbors
+#         direction = np.zeros((699, 639, 24))
+#         org = padded_matrix_1[1:-1, 1:-1]  # size is (699,639)
+#         #identifying the points
+#         dirs = {'dir_0': padded_matrix_1[1:-1, 2:], 'dir_1': padded_matrix_1[0:-2, 2:],
+#                 'dir_2': padded_matrix_1[0:-2, 1:-1],
+#                 'dir_3': padded_matrix_1[0:-2, 0:-2], 'dir_4': padded_matrix_1[1:-1, 0:-2],
+#                 'dir_5': padded_matrix_1[2:, 0:-2],
+#                 'dir_6': padded_matrix_1[2:, 1:-1], 'dir_7': padded_matrix_1[2:, 2:]}
+#         padded_matrix_2 = np.pad(importData(filelist[i])[column_name].values.reshape(699, 639), [(2, 2), (2, 2)],
+#                                  mode='constant', constant_values=0)  # to calculate 2nd degree neighbors
+#         dirs2 = {'dir_8': padded_matrix_2[2:-2, 4:], 'dir_9': padded_matrix_2[0:-4, 4:],
+#                  'dir_10': padded_matrix_2[0:-4, 2:-2],
+#                  'dir_11': padded_matrix_2[0:-4, 0:-4], 'dir_12': padded_matrix_2[2:-2, 0:-4],
+#                  'dir_13': padded_matrix_2[4:, 0:-4],
+#                  'dir_14': padded_matrix_2[4:, 2:-2], 'dir_15': padded_matrix_2[4:, 4:],
+#                  'dir_16': padded_matrix_2[3:-1, 4:],
+#                  'dir_17': padded_matrix_2[4:, 3:-1], 'dir_18': padded_matrix_2[4:, 1:-3],
+#                  'dir_19': padded_matrix_2[3:-1, 0:-4], 'dir_20': padded_matrix_2[1:-3, 0:-4],
+#                  'dir_21': padded_matrix_2[0:-4, 3:-1], 'dir_22': padded_matrix_2[0:-4, 1:-3],
+#                  'dir_23': padded_matrix_2[1:-3, 4:]
+#
+#                  }
+#         start_time_dir_mag = time.time()
+#         #calculating the differences
+#         for i in range(24):
+#             if (i < 8):
+#                 direction[:, :, i] = org - dirs['dir_' + str(i)]
+#             else:
+#                 direction[:, :, i] = org - dirs2['dir_' + str(i)]
+#         # magnitude and direction list
+#             mag_list.append(np.linalg.norm(direction, axis=2))
+#             dir_list.append(direction)
+#
+#         print("For computing direction and magnitude %s seconds" %(time.time() - start_time_dir_mag))
+#         return mag_list, dir_list
+
+## edited
 def dir_mag_by_5(filelist, column_name):
     """Calculate scalar diffrence of an entry againist its 24 neigbors"""
     mag_list = list()
     dir_list = list()
+    start_time_dir_mag = time.time()
     for i in range(len(filelist)):
         padded_matrix_1 = np.pad(importData(filelist[i])[column_name].values.reshape(699, 639), [(1, 1), (1, 1)],
                                  mode='constant', constant_values=0)  # to calculate 1st degree neighbors
-        direction = np.zeros((699, 639, 24))
-        org = padded_matrix_1[1:-1, 1:-1]
+        direction = np.zeros((24, 699, 639))
+        org = padded_matrix_1[1:-1, 1:-1]  # size is (699,639)
         #identifying the points
         dirs = {'dir_0': padded_matrix_1[1:-1, 2:], 'dir_1': padded_matrix_1[0:-2, 2:],
                 'dir_2': padded_matrix_1[0:-2, 1:-1],
@@ -248,11 +293,6 @@ def dir_mag_by_5(filelist, column_name):
                  'dir_11': padded_matrix_2[0:-4, 0:-4], 'dir_12': padded_matrix_2[2:-2, 0:-4],
                  'dir_13': padded_matrix_2[4:, 0:-4],
                  'dir_14': padded_matrix_2[4:, 2:-2], 'dir_15': padded_matrix_2[4:, 4:],
-                 # 'dir_16': padded_matrix_2[3:-1, 4:],
-                 # 'dir_17': padded_matrix_2[4:, 3:-1], 'dir_18': padded_matrix_2[4:, 1:-3],
-                 # 'dir_19': padded_matrix_2[3:-1, 0:-4], 'dir_20': padded_matrix_2[1:-3, 0:-4],
-                 # 'dir_21': padded_matrix_2[0:-4, 3:-1], 'dir_22': padded_matrix_2[0:-4, 1:-3],
-                 # 'dir_23': padded_matrix_2[1:-3, 4:]
                  'dir_23': padded_matrix_2[3:-1, 4:],
                  'dir_22': padded_matrix_2[4:, 3:-1], 'dir_21': padded_matrix_2[4:, 1:-3],
                  'dir_20': padded_matrix_2[3:-1, 0:-4], 'dir_19': padded_matrix_2[1:-3, 0:-4],
@@ -261,68 +301,118 @@ def dir_mag_by_5(filelist, column_name):
                  }
         start_time_dir_mag = time.time()
         #calculating the differences
-        for i in range(24):
-            if (i < 8):
-                direction[:, :, i] = org - dirs['dir_' + str(i)]
+        for j in range(24):
+            if (j < 8):
+                direction[j, :, :] = org - dirs['dir_' + str(j)]
             else:
-                direction[:, :, i] = org - dirs2['dir_' + str(i)]
+                direction[j, :, :] = org - dirs2['dir_' + str(j)]
         # magnitude and direction list
-            mag_list.append(np.linalg.norm(direction, axis=2))
-            dir_list.append(direction)
+        mag_list.append(np.linalg.norm(direction, axis=0))
+        dir_list.append(direction)
+    print("For computing direction and magnitude %s seconds" %(time.time() - start_time_dir_mag))
+    return mag_list, dir_list
 
-        print("For computing direction and magnitude %s seconds" %(time.time() - start_time_dir_mag))
-        return mag_list, dir_list
-
+# def draw_dirs2(filelist, column_name):
+#     """Calculate resultant direction in x and y"""
+#     mag, direction = dir_mag_by_5(filelist, column_name)
+#     res_dir_x_list = list()
+#     res_dir_y_list = list()
+#     start_time_vector_components = time.time()
+#     for i in range(len(filelist)):
+#         #for each file a structure is created to keep their directions
+#         res_dir_x = np.zeros_like(mag[i])
+#         res_dir_y = np.zeros_like(mag[i])
+#         # for each file, direction values in all directions are added
+#         for d in range(24):
+#             # if (d < 16):
+#             #     res_dir_x += direction[i][:, :, d] * np.cos(np.pi / 4 * (d % 8))
+#             #     res_dir_y += direction[i][:, :, d] * np.sin(np.pi / 4 * (d % 8))
+#             # else:
+#             #     res_dir_x += direction[i][:, :, d] * np.cos(np.pi / 8 * 2 * (d % 8) + 1)
+#             #     res_dir_y += direction[i][:, :, d] * np.sin(np.pi / 8 * 2 * (d % 8) + 1)
+#             #     res_dir_x_list.append(res_dir_x)
+#             #     res_dir_y_list.append(res_dir_y)
+#             if (d==0 or d==1 or d==2 or d==8 or d==9 or d==10):
+#                 res_dir_x += direction[i][:, :, d] * np.cos(np.pi / 4 * (d % 8))
+#                 res_dir_y += direction[i][:, :, d] * np.sin(np.pi / 4 * (d % 8))
+#             elif (d==3 or d==4 or d==11 or d==12):
+#                 res_dir_x += -direction[i][:, :, d] * np.cos(np.pi - (np.pi / 4 * (d % 8)))
+#                 res_dir_y += direction[i][:, :, d] * np.sin(np.pi - (np.pi / 4 * (d % 8)))
+#             elif (d==5 or d==6 or d==13 or d==14):
+#                 res_dir_x += -direction[i][:, :, d] * np.cos((np.pi / 4 * (d % 8)) - np.pi)
+#                 res_dir_y += -direction[i][:, :, d] * np.sin((np.pi / 4 * (d % 8)) - np.pi)
+#             elif (d==7 or d==15):
+#                 res_dir_x += direction[i][:, :, d] * np.cos(2 * np.pi - (np.pi / 4 * (d % 8)))
+#                 res_dir_y += -direction[i][:, :, d] * np.sin(2 * np.pi - (np.pi / 4 * (d % 8)))
+#             elif (d==16 or d==17):
+#                 res_dir_x += direction[i][:, :, d] * np.cos(np.pi / 8 * ((2 * (d % 8)) + 1))
+#                 res_dir_y += direction[i][:, :, d] * np.sin(np.pi / 8 * ((2 * (d % 8)) + 1))
+#             elif (d==18 or d==19):
+#                 res_dir_x += -direction[i][:, :, d] * np.cos(np.pi - (np.pi / 8 * ((2 * (d % 8)) + 1)))
+#                 res_dir_y += direction[i][:, :, d] * np.sin(np.pi - (np.pi / 8 * ((2 * (d % 8)) + 1)))
+#             elif (d==20 or d==21):
+#                 res_dir_x += -direction[i][:, :, d] * np.cos((np.pi / 8 * ((2 * (d % 8)) + 1)) - np.pi)
+#                 res_dir_y += -direction[i][:, :, d] * np.sin((np.pi / 8 * ((2 * (d % 8)) + 1)) - np.pi)
+#             elif (d==22 or d==23):
+#                 res_dir_x += direction[i][:, :, d] * np.cos(2 * np.pi - (np.pi / 8 * ((2 * (d % 8)) + 1)))
+#                 res_dir_y += direction[i][:, :, d] * np.sin(2 * np.pi - (np.pi / 8 * ((2 * (d % 8)) + 1)))
+#             res_dir_x_list.append(res_dir_x)
+#             res_dir_y_list.append(res_dir_y)
+#     print("For computing vector components %s seconds" % (time.time() - start_time_vector_components))
+#     return res_dir_x_list, res_dir_y_list, mag, direction
 
 def draw_dirs2(filelist, column_name):
     """Calculate resultant direction in x and y"""
     mag, direction = dir_mag_by_5(filelist, column_name)
-    res_dir_x_list = list()
-    res_dir_y_list = list()
-    start_time_vector_components = time.time()
+    direction = np.array(direction)
+    res_dir_x_list_final = []
+    res_dir_y_list_final = []
+
     for i in range(len(filelist)):
-        #for each file a structure is created to keep their directions
+        # for each file a structure is created to keep their directions
+        # print(np.array(mag[i]).shape)
+        # print(np.array(mag).shape)
+
         res_dir_x = np.zeros_like(mag[i])
         res_dir_y = np.zeros_like(mag[i])
+
+        res_dir_x_list = list()
+        res_dir_y_list = list()
         # for each file, direction values in all directions are added
         for d in range(24):
-            # if (d < 16):
-            #     res_dir_x += direction[i][:, :, d] * np.cos(np.pi / 4 * (d % 8))
-            #     res_dir_y += direction[i][:, :, d] * np.sin(np.pi / 4 * (d % 8))
-            # else:
-            #     res_dir_x += direction[i][:, :, d] * np.cos(np.pi / 8 * 2 * (d % 8) + 1)
-            #     res_dir_y += direction[i][:, :, d] * np.sin(np.pi / 8 * 2 * (d % 8) + 1)
-            #     res_dir_x_list.append(res_dir_x)
-            #     res_dir_y_list.append(res_dir_y)
-            if (d==0 or d==1 or d==2 or d==8 or d==9 or d==10):
-                res_dir_x += direction[i][:, :, d] * np.cos(np.pi / 4 * (d % 8))
-                res_dir_y += direction[i][:, :, d] * np.sin(np.pi / 4 * (d % 8))
-            elif (d==3 or d==4 or d==11 or d==12):
-                res_dir_x += -direction[i][:, :, d] * np.cos(np.pi - (np.pi / 4 * (d % 8)))
-                res_dir_y += direction[i][:, :, d] * np.sin(np.pi - (np.pi / 4 * (d % 8)))
-            elif (d==5 or d==6 or d==13 or d==14):
-                res_dir_x += -direction[i][:, :, d] * np.cos((np.pi / 4 * (d % 8)) - np.pi)
-                res_dir_y += -direction[i][:, :, d] * np.sin((np.pi / 4 * (d % 8)) - np.pi)
-            elif (d==7 or d==15):
-                res_dir_x += direction[i][:, :, d] * np.cos(2 * np.pi - (np.pi / 4 * (d % 8)))
-                res_dir_y += -direction[i][:, :, d] * np.sin(2 * np.pi - (np.pi / 4 * (d % 8)))
-            elif (d==16 or d==17):
-                res_dir_x += direction[i][:, :, d] * np.cos(np.pi / 8 * ((2 * (d % 8)) + 1))
-                res_dir_y += direction[i][:, :, d] * np.sin(np.pi / 8 * ((2 * (d % 8)) + 1))
-            elif (d==18 or d==19):
-                res_dir_x += -direction[i][:, :, d] * np.cos(np.pi - (np.pi / 8 * ((2 * (d % 8)) + 1)))
-                res_dir_y += direction[i][:, :, d] * np.sin(np.pi - (np.pi / 8 * ((2 * (d % 8)) + 1)))
-            elif (d==20 or d==21):
-                res_dir_x += -direction[i][:, :, d] * np.cos((np.pi / 8 * ((2 * (d % 8)) + 1)) - np.pi)
-                res_dir_y += -direction[i][:, :, d] * np.sin((np.pi / 8 * ((2 * (d % 8)) + 1)) - np.pi)
-            elif (d==22 or d==23):
-                res_dir_x += direction[i][:, :, d] * np.cos(2 * np.pi - (np.pi / 8 * ((2 * (d % 8)) + 1)))
-                res_dir_y += direction[i][:, :, d] * np.sin(2 * np.pi - (np.pi / 8 * ((2 * (d % 8)) + 1)))
+            if (d == 0 or d == 1 or d == 2 or d == 8 or d == 9 or d == 10):
+                # print(res_dir_x.shape)
+                # print(direction[i, d, :, :].shape)
+
+                res_dir_x += direction[i, d, :, :] * np.cos(np.pi / 4 * (d % 8))
+                res_dir_y += direction[i, d, :, :] * np.sin(np.pi / 4 * (d % 8))
+            elif (d == 3 or d == 4 or d == 11 or d == 12):
+                res_dir_x += -direction[i, d, :, :] * np.cos(np.pi - (np.pi / 4 * (d % 8)))
+                res_dir_y += direction[i, d, :, :] * np.sin(np.pi - (np.pi / 4 * (d % 8)))
+            elif (d == 5 or d == 6 or d == 13 or d == 14):
+                res_dir_x += -direction[i, d, :, :] * np.cos((np.pi / 4 * (d % 8)) - np.pi)
+                res_dir_y += -direction[i, d, :, :] * np.sin((np.pi / 4 * (d % 8)) - np.pi)
+            elif (d == 7 or d == 15):
+                res_dir_x += direction[i, d, :, :] * np.cos(2 * np.pi - (np.pi / 4 * (d % 8)))
+                res_dir_y += -direction[i, d, :, :] * np.sin(2 * np.pi - (np.pi / 4 * (d % 8)))
+            elif (d == 16 or d == 17):
+                res_dir_x += direction[i, d, :, :] * np.cos(np.pi / 8 * ((2 * (d % 8)) + 1))
+                res_dir_y += direction[i, d, :, :] * np.sin(np.pi / 8 * ((2 * (d % 8)) + 1))
+            elif (d == 18 or d == 19):
+                res_dir_x += -direction[i, d, :, :] * np.cos(np.pi - (np.pi / 8 * ((2 * (d % 8)) + 1)))
+                res_dir_y += direction[i, d, :, :] * np.sin(np.pi - (np.pi / 8 * ((2 * (d % 8)) + 1)))
+            elif (d == 20 or d == 21):
+                res_dir_x += -direction[i, d, :, :] * np.cos((np.pi / 8 * ((2 * (d % 8)) + 1)) - np.pi)
+                res_dir_y += -direction[i, d, :, :] * np.sin((np.pi / 8 * ((2 * (d % 8)) + 1)) - np.pi)
+            elif (d == 22 or d == 23):
+                res_dir_x += direction[i, d, :, :] * np.cos(2 * np.pi - (np.pi / 8 * ((2 * (d % 8)) + 1)))
+                res_dir_y += direction[i, d, :, :] * np.sin(2 * np.pi - (np.pi / 8 * ((2 * (d % 8)) + 1)))
             res_dir_x_list.append(res_dir_x)
             res_dir_y_list.append(res_dir_y)
-    print("For computing vector components %s seconds" % (time.time() - start_time_vector_components))
+        res_dir_x_list_final.append(res_dir_x_list)
+        res_dir_y_list_final.append(res_dir_y_list)
 
-    return res_dir_x_list, res_dir_y_list, mag, direction
+    return res_dir_x_list_final, res_dir_y_list_final, mag, direction
 
 
 def fetch_direction(file_list, column_name):
@@ -335,17 +425,25 @@ def fetch_direction(file_list, column_name):
     all_in_y = np.zeros_like(mag[0])
     all_mag = np.zeros_like(mag[0])
     #aggregating all direction values in x and y positions for all files
+
+
+    all_in_x = np.array(all_in_x)
+    all_in_y = np.array(all_in_y)
     for i in range(len(res_dir_x_list)):
         all_in_x = np.add(all_in_x, res_dir_x_list[i])
         all_in_y = np.add(all_in_y, res_dir_y_list[i])
+    all_in_x = np.sum(all_in_x, axis=0)
+    all_in_y = np.sum(all_in_y, axis=0)
     #creating 1 D array of aggregated results in X and Y directions
     res_x = all_in_x.ravel()
     res_y = all_in_y.ravel()
 
     #adding a column as aggregated recult in dataframe from a dataset
-    data = importData(file_list[0])
-    # why??
-    print(file_list)
+    data = importData(file_list[0]) # why?? From this point on, we are only showing the changes on the first file
+    #print(file_list)
+
+    print(np.array(res_x).shape)
+
     data['res_x'] = res_x
     data['res_y'] = res_y
     print("For aggregating vector components %s seconds" % (time.time() - start_time_aggrigating_vector_components))
@@ -448,11 +546,11 @@ def filterBasedOnGrid(depth, weighted_graph):
     qtree = QTree(depth, points)
     #print(points)
     qtree.subdivide()
+    #print('I am also here')
     h = qtree.graph()
     x_grid = np.unique(np.array(h[0])//1).tolist()
-    y_grid =  np.unique(np.array(h[1])//1).tolist()
-    weighted_graph = weighted_graph[
-        (np.isin(weighted_graph['node_x'], x_grid)) | (np.isin(weighted_graph['node_y'], y_grid))]
+    y_grid = np.unique(np.array(h[1])//1).tolist()
+    weighted_graph = weighted_graph[(np.isin(weighted_graph['node_x'], x_grid)) | (np.isin(weighted_graph['node_y'], y_grid))]
     return weighted_graph
 
 
